@@ -1,4 +1,6 @@
-﻿namespace TimerOpdracht
+﻿using System.Timers;
+
+namespace TimerOpdracht
 {
     internal class Program
     {
@@ -6,12 +8,10 @@
 
         static void Main(string[] args)
         {
-            Tuple<int, int, bool> alarm = Tuple.Create(10, 5, true);
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            int sluimertijd = 0;
             int length = 0;
             int snooze = 0;
-            alarmType at1 = new alarmType(geluid); // IDE0090: simplified 'new' expression
-            alarmType at2 = new alarmType(licht);
-            alarmType at3 = new alarmType(boodschap);
             int choice = 0;
 
             do //Menu lus
@@ -21,10 +21,10 @@
                 Console.WriteLine("3. Stop de wekker");
                 Console.WriteLine("4. Sluimer de wekker");
                 Console.WriteLine("5. Start de wekker");
-                Console.WriteLine("6. Geluid");
-                Console.WriteLine("7. Licht");
-                Console.WriteLine("8. Boodschap");
-                Console.WriteLine("Press 0 to quit...");
+                Console.WriteLine("6. Voeg geluid toe");
+                Console.WriteLine("7. Voeg licht toe");
+                Console.WriteLine("8. Voeg boodschap toe");
+                Console.WriteLine("0. Sluit af");
                 try
                 {
                     choice = Convert.ToInt32(Console.ReadLine());
@@ -34,36 +34,43 @@
                     Console.WriteLine("Ongeldige invoer, probeer het opnieuw.");
 
                 }
+                ClearConsole();
 
                 switch (choice)
                 {
                     case 1:
                         Console.WriteLine("Stel de tijd in van je wekker(seconden)");
-                        length = Console.Read();
-                        alarm = Tuple.Create(length, 5, true);
+                        length = Convert.ToInt32(Console.ReadLine());
+                        aTimer.Interval = length * 1000; // Convert seconds to milliseconds
                         break;
                     case 2:
                         Console.WriteLine("Stel de sluimertijd in(seconden)");
-                        snooze = Console.Read();
-                        alarm = Tuple.Create(length, snooze, true);
+                        snooze = Convert.ToInt32(Console.ReadLine());
+                        sluimertijd = snooze * 1000; // Convert seconds to milliseconds
                         break;
                     case 3:
-                        Console.WriteLine("Stop de wekker");
+                        Console.WriteLine("Wekker gestopt");
+                        aTimer.Stop();
                         break;
                     case 4:
-                        Console.WriteLine("Sluimer de wekker");
+                        Console.WriteLine("Wekker is gesluimerd voor " + sluimertijd / 1000 + " seconden");
+                        aTimer.Interval += sluimertijd;
                         break;
                     case 5:
                         Console.WriteLine("Start de wekker");
+                        aTimer.Enabled = true;
                         break;
                     case 6:
-                        at1();
+                        Console.WriteLine("Geluid ingesteld");
+                        aTimer.Elapsed += geluid;
                         break;
                     case 7:
-                        at2();
+                        Console.WriteLine("Licht ingesteld");
+                        aTimer.Elapsed += licht;
                         break;
                     case 8:
-                        at3();
+                        Console.WriteLine("Boodschap ingesteld");
+                        aTimer.Elapsed += boodschap;
                         break;
                     case 0:
                         Console.WriteLine("Exiting...");
@@ -76,17 +83,23 @@
 
 
         }
-        public static void geluid()
+        public static void geluid(Object source, System.Timers.ElapsedEventArgs e)
         {
             Console.WriteLine("Alarm is ringing!");
         }
-        public static void licht()
+        public static void licht(Object source, System.Timers.ElapsedEventArgs e)
         {
             Console.WriteLine("Alarm is flashing!");
         }
-        public static void boodschap()
+        public static void boodschap(Object source, System.Timers.ElapsedEventArgs e)
         {
             Console.WriteLine("Alarm is messaging!");
         }
+        public static void ClearConsole()
+        {
+            Console.Clear();
+            Console.WriteLine("\x1b[3J");
+        }
+
     }
 }
